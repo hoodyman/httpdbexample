@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test form</title>
+    <link rel="stylesheet" href="static/css/styles.css" type="text/css">
+</head>
+<body>
+
+    {{if eq .DbStatus "Ok"}}
+    <form method="post" enctype="application/x-www-form-urlencoded">
+        {{.Csrftoken}}
+        <label>Database table found</label>
+        <input type="submit" name="deletetable" formmethod="post" value="Delete database table">
+    </form>
+    {{else}}
+    <form method="post" enctype="application/x-www-form-urlencoded">
+        {{.Csrftoken}}
+        <label>No database table found</label>
+        <input type="submit" name="createtable" formmethod="post" value="Create database table">
+    </form>
+    {{end}}
+
+    <form method="post" enctype="application/x-www-form-urlencoded">
+        {{.Csrftoken}}
+        <div class="class1">
+            <label>Add new data</label>
+            <input type="edit" value="{{.InputData}}" name="InputData">
+            <input type="submit" name="putdata" formmethod="post" value="Put data">
+        </div> 
+    </form>
+
+    <hr>
+
+    <form method="post" enctype="application/x-www-form-urlencoded">
+        {{.Csrftoken}}
+        <div class="class1">
+            <select class="class1" name="DeleteData" multiple size="{{len .OutputData}}">
+                {{range .OutputData}}
+                <option value="{{.DataId}}">{{.DataValue}}</option>
+                {{end}}
+            </select>
+            <br>
+            <input type="submit" name="deletedata" formmethod="post" value="Delete selected">
+        </div>
+    </form>
+</body>
+</html>
