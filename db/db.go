@@ -28,7 +28,7 @@ const (
 )
 
 func InitDb() error {
-	url := "postgres://testdb_adm:123@localhost:5432/testdb"
+	const url = "postgres://testdb_adm:123@localhost:5432/testdb"
 	var err error
 	dbPool, err = pgxpool.Connect(context.Background(), url)
 	if err != nil {
@@ -58,9 +58,9 @@ func (dbconn *DbConnection) Conn() *pgxpool.Conn {
 }
 
 func (dbconn *DbConnection) IsTableExist() (bool, error) {
-	query := `SELECT tablename FROM pg_tables WHERE tablename='` +
-		dbTableName + `'`
-	r := dbconn.conn.QueryRow(context.Background(), query)
+	const query = "SELECT tablename FROM pg_tables WHERE tablename='" + dbTableName + "'"
+	r := dbconn.conn.QueryRow(context.Background(),
+		query)
 	var x string
 	err := r.Scan(&x)
 	if err == nil {
@@ -73,38 +73,46 @@ func (dbconn *DbConnection) IsTableExist() (bool, error) {
 }
 
 func (dbconn *DbConnection) CreateTable() error {
-	query := `CREATE TABLE ` + dbTableName + ` (` + dbIdColumn +
-		` SERIAL PRIMARY KEY,` + dbValueColumn + ` text)`
-	_, err := dbconn.conn.Exec(context.Background(), query)
+	const query = "CREATE TABLE " +
+		dbTableName + " (" +
+		dbIdColumn + " SERIAL PRIMARY KEY, " +
+		dbValueColumn + " text)"
+	_, err := dbconn.conn.Exec(context.Background(),
+		query)
 	return err
 }
 
 func (dbconn *DbConnection) DeleteTable() error {
-	query := `DROP TABLE ` + dbTableName
-	_, err := dbconn.conn.Exec(context.Background(), query)
+	const query = "DROP TABLE " + dbTableName
+	_, err := dbconn.conn.Exec(context.Background(),
+		query)
 	return err
 }
 
 func (dbconn *DbConnection) AppendData(data DbTableData) error {
-	query := `INSERT INTO ` + dbTableName +
-		` (` + dbValueColumn +
-		`) VALUES ('` + data.Value + `')`
-	_, err := dbconn.conn.Exec(context.Background(), query)
+	const query = "INSERT INTO " +
+		dbTableName + " (" +
+		dbValueColumn + ") VALUES ($1)"
+	_, err := dbconn.conn.Exec(context.Background(),
+		query,
+		data.Value)
 	return err
 }
 
 func (dbconn *DbConnection) DeleteData(data DbTableData) error {
-	query := `DELETE FROM ` + dbTableName +
-		` WHERE ` + dbIdColumn + `='` + strconv.Itoa(data.Id) + `'`
-	_, err := dbconn.conn.Exec(context.Background(), query)
+	const query = "DELETE FROM " + dbTableName + " WHERE " + dbIdColumn + "=$1"
+	_, err := dbconn.conn.Exec(context.Background(),
+		query,
+		strconv.Itoa(data.Id))
 	return err
 }
 
 func (dbconn *DbConnection) GetDataScanner() (DbTableDataScanner, error) {
 	ds := DbTableDataScanner{}
-	query := `SELECT * FROM ` + dbTableName
+	const query = "SELECT * FROM " + dbTableName
 	var err error
-	ds.pgxRows, err = dbconn.conn.Query(context.Background(), query)
+	ds.pgxRows, err = dbconn.conn.Query(context.Background(),
+		query)
 	return ds, err
 }
 
